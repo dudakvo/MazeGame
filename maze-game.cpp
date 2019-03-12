@@ -168,6 +168,7 @@ bool scanForCharS(const Maze &maze,
 char moveAndGather(int row,
                    int column,
                    const std::string &command,
+ 		   const bool keyTicket,
                    Maze  &prMaze)
 {
     char rCharMovedOnto = cEmptySymbol;
@@ -179,7 +180,7 @@ char moveAndGather(int row,
     {
         rCharMovedOnto = prMaze[row][column - 1];
 
-        if (rCharMovedOnto != cWallSymbol)
+        if ((rCharMovedOnto != cWallSymbol)&&((rCharMovedOnto != cExitSymbol) || keyTicket))
         {
             column--;
         }
@@ -189,7 +190,7 @@ char moveAndGather(int row,
     {
         rCharMovedOnto = prMaze[row][column + 1];
 
-        if (rCharMovedOnto != cWallSymbol)
+        if ((rCharMovedOnto != cWallSymbol) && (rCharMovedOnto != cExitSymbol) || keyTicket)
         {
             column++;
         }
@@ -199,7 +200,7 @@ char moveAndGather(int row,
     {
         rCharMovedOnto = prMaze[row - 1][column];
 
-        if (rCharMovedOnto != cWallSymbol)
+        if ((rCharMovedOnto != cWallSymbol) && (rCharMovedOnto != cExitSymbol) || keyTicket)
         {
             row--;
         }
@@ -209,7 +210,7 @@ char moveAndGather(int row,
     {
         rCharMovedOnto = prMaze[row + 1][column];
 
-        if (rCharMovedOnto != cWallSymbol)
+        if ((rCharMovedOnto != cWallSymbol) && (rCharMovedOnto != cExitSymbol) || keyTicket)
         {
             row++;
         }
@@ -245,7 +246,7 @@ bool moveCharacterAndCheckIfExitFound(Maze &prMaze, bool &keyTicket)
         std::string command;
         std::cin >> command;
 
-        const char charMovedOnto = moveAndGather(charRow, charColumn, command, prMaze);
+        const char charMovedOnto = moveAndGather(charRow, charColumn, command, keyTicket, prMaze);
 
         if (charMovedOnto == cWallSymbol)
         {
