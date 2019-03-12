@@ -39,6 +39,29 @@ bool doesUserWantsToPlay()
     return rResult;
 }
 
+
+void randomSymbolGeneration (Maze &prMaze, char cSymbol)
+{
+   int rowMaze, columnMaze;
+   do
+   {
+     static std::random_device rd;
+     static std::mt19937 mt{rd()};
+     static std::uniform_int_distribution<int> rowGenerator = std::uniform_int_distribution<int>(2, cMazeRows - 2);
+     static std::uniform_int_distribution<int> columnGenerator = std::uniform_int_distribution<int>(2, cMazeColumns - 2);
+     rowMaze=rowGenerator(mt);
+     columnMaze=columnGenerator(mt);
+     if(scanForCharS(prMaze, cEmptySymbol, rowMaze, columnMaze))
+     {
+        prMaze[rowMaze][columnMaze] = cSymbol;
+	return;
+     }
+    }
+    while (true);
+}
+
+
+
 // Generates maze
 // Parameters:
 //       maze - reference to maze field that will be modified
@@ -64,11 +87,10 @@ void generateMaze(Maze &prMaze)
     prMaze[1][1] = cCharacterSymbol;
 
     // Place exit randomly
-    static std::random_device rd;
-    static std::mt19937 mt{rd()};
-    static std::uniform_int_distribution<int> rowGenerator = std::uniform_int_distribution<int>(2, cMazeRows - 2);
-    static std::uniform_int_distribution<int> columnGenerator = std::uniform_int_distribution<int>(2, cMazeColumns - 2);
-    prMaze[rowGenerator(mt)][columnGenerator(mt)] = cExitSymbol;
+
+    randomSymbolGeneration (prMaze, cExitSymbol);
+    randomSymbolGeneration (prMaze, cKeySymbol);
+   
 }
 
 // Draws maze onto screen
@@ -99,6 +121,27 @@ bool scanForChar(const Maze &maze,
                  const char charToFind,
                  int &prCharRow,
                  int &prCharColumn)
+{
+    for (int row = 0; row < cMazeRows; row++)
+    {
+        for (int column = 0; column < cMazeColumns; column++)
+        {
+            if (maze[row][column] == charToFind)
+            {
+                prCharRow = row;
+                prCharColumn = column;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool scanForCharS(const Maze &maze,
+                 const char charToFind,
+                 int prCharRow,
+                 int prCharColumn)
 {
     for (int row = 0; row < cMazeRows; row++)
     {
@@ -189,9 +232,10 @@ void gameMessage(const std::string& message)
 // Moves character and check if exit was found as a result of that move.
 // Parameters:
 //      prMaze - reference to maze field; will be modified while player moves.
-bool moveCharacterAndCheckIfExitFound(Maze &prMaze)
+bool moveCharacterAndCheckIfExitFound(Maze &prMaze, bool &keyTicket)
 {
     bool rExitFound = false;
+//    bool keyTicket == false;
 
     int charRow = 1;
     int charColumn = 1;
@@ -207,8 +251,13 @@ bool moveCharacterAndCheckIfExitFound(Maze &prMaze)
         {
             gameMessage("Cannot move here!");
         }
+        
+        if (charMovedOnto == cKeySymbol)
+        {
+	   keyTicket = true;
+ 	}
 
-        if (charMovedOnto == cExitSymbol)
+        if ((charMovedOnto == cExitSymbol)&&keyTicket)
         {
             gameMessage("Exit found!");
             rExitFound = true;
@@ -225,6 +274,8 @@ bool moveCharacterAndCheckIfExitFound(Maze &prMaze)
 // Executes one round of the game
 void playMazeGame()
 {
+    
+    bool keyTicket = false;
     std::cout << "LETS START!" << std::endl;
 
     Maze maze;
@@ -234,7 +285,7 @@ void playMazeGame()
     {
         drawMaze(maze);
     }
-    while (!moveCharacterAndCheckIfExitFound(maze));
+    while (!moveCharacterAndCheckIfExitFound(maze, keyTicket));
 }
 
 int main()

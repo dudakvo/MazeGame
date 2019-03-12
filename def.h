@@ -8,3 +8,8 @@ const char cExitSymbol = '#';
 const char cKeySymbol = 'K';
 
 using Maze = std::array<std::array<char, cMazeColumns>, cMazeRows>;
+
+bool scanForCharS(const Maze &maze,
+                 const char charToFind,
+                 int prCharRow,
+                 int prCharColumn);
