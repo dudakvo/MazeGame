@@ -1,5 +1,5 @@
-const int cMazeColumns = 12;
-const int cMazeRows = 8;
+const int cMazeColumns = 21;
+const int cMazeRows = 21;
 
 const char cEmptySymbol = ' ';
 const char cWallSymbol = 'X';

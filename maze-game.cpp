@@ -3,6 +3,8 @@
 #include <array>
 #include <random>
 #include "./def.h"
+#include <time.h>
+#include <stdlib.h>
 
 // const int cMazeColumns = 12;
 // const int cMazeRows = 8;
@@ -68,11 +70,13 @@ void randomSymbolGeneration (Maze &prMaze, char cSymbol)
 //              (walls added, added character and exit)
 void generateMaze(Maze &prMaze)
 {
-    for (int row = 0; row < cMazeRows; row++)
+    int course;
+    for (int row = 0; row < cMazeRows; row++)   // generation walls
     {
         for (int column = 0; column < cMazeColumns; column++)
         {
-            if ((row == 0) || (row == cMazeRows - 1) || (column == 0) || (column == cMazeColumns - 1))
+            if ((row == 0) || (row == cMazeRows - 1) || (column == 0) || (column == cMazeColumns - 1) || ((row % 2) ==0) 
+|| ((column % 2) == 0))
             {
                 prMaze[row][column] = cWallSymbol;
             }
@@ -82,7 +86,34 @@ void generateMaze(Maze &prMaze)
             }
         }
     }
+    //=================================================
+    //======generator doors ===========================
+	srand(time(NULL));
+	for (int row = 1; row < cMazeRows; row +=2)
+	
+	{
+//	int row{1};
+	//row=1;
+	   for (int column = 1; column < (cMazeColumns-2); column += 2)
+	   {
+ 	     if ((row-2) < 0)
+	    	prMaze[row][column+1] = cEmptySymbol;
+	     else
+	     {
+//		srand(time(NULL)); 
+		course = 1 + rand() % 2;
+		if(course == 1)
+			prMaze[row-1][column]=cEmptySymbol;
+		if (course ==2)
+			if ((column+2)>cMazeColumns)
+			 	prMaze[row-1][column]=cEmptySymbol;
+			else
+				prMaze[row][column+1]=cEmptySymbol;
+	     }	
+	   }
+	}    
 
+ 
     // Place character - always at positon 1,1
     prMaze[1][1] = cCharacterSymbol;
 
