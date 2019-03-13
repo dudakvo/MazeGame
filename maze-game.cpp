@@ -5,6 +5,7 @@
 #include "./def.h"
 #include <time.h>
 #include <stdlib.h>
+#include <vector>
 
 // const int cMazeColumns = 12;
 // const int cMazeRows = 8;
@@ -45,6 +46,7 @@ bool doesUserWantsToPlay()
 void randomSymbolGeneration (Maze &prMaze, char cSymbol)
 {
    int rowMaze, columnMaze;
+  // srand(time(NULL));
    do
    {
      static std::random_device rd;
@@ -53,6 +55,10 @@ void randomSymbolGeneration (Maze &prMaze, char cSymbol)
      static std::uniform_int_distribution<int> columnGenerator = std::uniform_int_distribution<int>(2, cMazeColumns - 2);
      rowMaze=rowGenerator(mt);
      columnMaze=columnGenerator(mt);
+	
+//	rowMaze = 2 + rand() % (cMazeRows - 2);
+//	columnMaze = 2 + rand() % (cMazeColumns -2);
+
      if(scanForCharS(prMaze, cEmptySymbol, rowMaze, columnMaze))
      {
         prMaze[rowMaze][columnMaze] = cSymbol;
@@ -62,32 +68,9 @@ void randomSymbolGeneration (Maze &prMaze, char cSymbol)
     while (true);
 }
 
-
-
-// Generates maze
-// Parameters:
-//       maze - reference to maze field that will be modified
-//              (walls added, added character and exit)
-void generateMaze(Maze &prMaze)
+biasMaze (Maze &prMaze) // generation maze  by method of bias 
 {
-    int course;
-    for (int row = 0; row < cMazeRows; row++)   // generation walls
-    {
-        for (int column = 0; column < cMazeColumns; column++)
-        {
-            if ((row == 0) || (row == cMazeRows - 1) || (column == 0) || (column == cMazeColumns - 1) || ((row % 2) ==0) 
-|| ((column % 2) == 0))
-            {
-                prMaze[row][column] = cWallSymbol;
-            }
-            else
-            {
-                prMaze[row][column] = cEmptySymbol;
-            }
-        }
-    }
-    //=================================================
-    //======generator doors ===========================
+	int course;
 	srand(time(NULL));
 	for (int row = 1; row < cMazeRows; row +=2)
 	
@@ -100,7 +83,6 @@ void generateMaze(Maze &prMaze)
 	    	prMaze[row][column+1] = cEmptySymbol;
 	     else
 	     {
-//		srand(time(NULL)); 
 		course = 1 + rand() % 2;
 		if(course == 1)
 			prMaze[row-1][column]=cEmptySymbol;
@@ -112,15 +94,93 @@ void generateMaze(Maze &prMaze)
 	     }	
 	   }
 	}    
+}
 
+void sidewinderMaze (Maze &prMaze)
+{
+  int course, cellsRoom;
+  int randomCell;
+  std::vector <int> room;
+  srand(time(NULL));
+  for ( int row=1; row<cMazeRows; row+=2)
+  {
+	for (int column=1; column>cMazeColumns; column+=2)
+	{
+		while (true)
+		{
+			cellsRoom=1 + rand() % 3;
+			if (((cellsRoom*2)+column)<cMazeColumns)  //????
+				break;
+		} 
+
+		for (int cell=column; cell<(column+(cellsRoom*2)-1); cell+=2)
+		{
+			room.push_back(cell);
+			prMaze[row][cell+1]=cEmptySymbol;
+		}
+		randomCell = rand() % cellsRoom;
+		course = 1 + rand () % 2; 
+		if (((prMaze[row][room[randomCell]+1]==cEmptySymbol) || 
+				(room[randomCell]+2)>cMazeColumns)&&(row-2)>0)
+		{
+			prMaze[row-1][room[randomCell]];
+		}
+		if (((room[randomCell]+2)>cMazeColumns) && (row-2)>0)
+		{
+			prMaze[row-1][room[randomCell]]=cEmptySymbol;
+		}
+		else
+		{
+			if(1==course)
+				prMaze[row-1][room[randomCell]]==cEmptySymbol;
+			if (2==course)
+				prMaze[row][room[randomCell]+1];
+		}
+		column += (cellsRoom*2);
+		room.clear();
+	}
+  }
+
+
+}
+
+// Generates maze
+// Parameters:
+//       maze - reference to maze field that will be modified
+//              (walls added, added character and exit)
+void generateMaze(Maze &prMaze)
+{
+//    int course;
+    for (int row = 0; row < cMazeRows; row++)   // generation walls
+    {
+        for (int column = 0; column < cMazeColumns; column++)
+        {
+            if ((row == 0) || (row == cMazeRows - 1) || (column == 0) || (column == cMazeColumns - 1) || ((row % 2) ==0) 
+			 									|| ((column % 2) == 0))
+            {
+                prMaze[row][column] = cWallSymbol;
+            }
+            else
+            {
+                prMaze[row][column] = cEmptySymbol;
+            }
+        }
+    }
+    //=================================================
+    //======generator doors ===========================
+
+    biasMaze(prMaze);
+  //  sidewinderMaze(prMaze);
  
     // Place character - always at positon 1,1
+	 randomSymbolGeneration (prMaze, cKeySymbol);
+
     prMaze[1][1] = cCharacterSymbol;
 
     // Place exit randomly
 
     randomSymbolGeneration (prMaze, cExitSymbol);
-    randomSymbolGeneration (prMaze, cKeySymbol);
+   
    
 }
 
@@ -287,6 +347,7 @@ bool moveCharacterAndCheckIfExitFound(Maze &prMaze, bool &keyTicket)
         if (charMovedOnto == cKeySymbol)
         {
 	   keyTicket = true;
+	   gameMessage ("You have key!!!");
  	}
 
         if ((charMovedOnto == cExitSymbol)&&keyTicket)
